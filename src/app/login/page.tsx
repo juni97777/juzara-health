@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
@@ -57,4 +57,13 @@ export default function LoginPage() {
       <div className="auth-foot"><Link href="/">Kembali ke halaman utama</Link></div>
     </form>
   </main>;
+}
+
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="auth-wrap"><div className="auth-card">Memuat halaman masuk...</div></main>}>
+      <LoginForm />
+    </Suspense>
+  );
 }
