@@ -25,6 +25,14 @@ export async function GET(_req:Request,ctx:{params:Promise<{id:string}>}){
  ];
  let y=740;for(const line of lines){page.drawText(line,{x:45,y,size:11,font});y-=30;}
  page.drawText("Dokumen demonstrasi JUZARA Health",{x:45,y:70,size:9,font});
- const bytes=await pdf.save();
- return new NextResponse(bytes,{headers:{"Content-Type":"application/pdf","Content-Disposition":`attachment; filename="hasil-lab-${result.id}.pdf"`}});
-}
+const bytes = await pdf.save();
+
+const body = new ArrayBuffer(bytes.byteLength);
+new Uint8Array(body).set(bytes);
+
+return new NextResponse(body, {
+  headers: {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": "attachment; filename=laboratory-result.pdf",
+  },
+});
