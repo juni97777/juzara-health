@@ -1,0 +1,10 @@
+"use client";
+import { useEffect,useState } from "react";
+export default function QueuesPage(){
+ const [rows,setRows]=useState<any[]>([]);const [error,setError]=useState("");const [message,setMessage]=useState("");
+ async function load(){const r=await fetch("/api/queue");const d=await r.json();if(!r.ok){setError(d.error);return}setRows(d.queues||[])}
+ async function callNext(){setMessage("");const r=await fetch("/api/queue/next",{method:"POST"});const d=await r.json();if(!r.ok){setMessage(d.error);return}setMessage("Pasien antrean "+d.appointment.queueNumber+" dipanggil.");load()}
+ async function changeStatus(id:string,status:string){const r=await fetch(`/api/appointments/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});const d=await r.json();if(!r.ok){setMessage(d.error);return}setMessage("Status antrean diperbarui.");load()}
+ useEffect(()=>{load();const t=setInterval(load,5000);return()=>clearInterval(t)},[]);
+ return <main className="dashboard"><a href="/dashboard">← Dashboard</a><h1>Antrean online</h1><p>Data antrean dimuat ulang otomatis setiap lima detik.</p>{error&&<p className="error">{error}</p>}{message&&<p className="success">{message}</p>}<button className="btn" onClick={callNext}>Panggil pasien berikutnya</button>{rows.map(a=><article className="data-card" key={a.id}><h3>Nomor antrean {a.queueNumber} · {a.status}</h3><p>{a.patient.user.fullName} — {a.doctor.name}</p><p>{a.facility.name} · {new Date(a.visitDate).toLocaleDateString("id-ID")} · {a.startTime}</p><p>Pasien di depan: {a.patientsAhead} · Estimasi: {a.estimatedWaitMinutes} menit</p><div className="action-row"><button className="btn small" onClick={()=>changeStatus(a.id,"IN_SERVICE")}>Sedang dilayani</button><button className="btn small green" onClick={()=>changeStatus(a.id,"COMPLETED")}>Selesai</button><button className="btn small danger" onClick={()=>changeStatus(a.id,"NO_SHOW")}>Tidak hadir</button><button className="btn small secondary" onClick={()=>changeStatus(a.id,"CANCELLED")}>Batalkan</button></div></article>)}</main>
+}

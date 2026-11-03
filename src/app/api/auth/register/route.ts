@@ -1,0 +1,7 @@
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
+import { createSession } from '@/lib/session';
+const schema=z.object({fullName:z.string().min(3),identityNumber:z.string().min(8),birthDate:z.string(),gender:z.enum(['MALE','FEMALE','OTHER']),address:z.string().trim().min(5,'Alamat wajib diisi.'),phone:z.string().min(8),email:z.string().email(),password:z.string().min(8),confirmPassword:z.string().min(8)}).refine(v=>v.password===v.confirmPassword,{message:'Konfirmasi password harus sama dengan password.',path:['confirmPassword']});
+export async function POST(req:Request){try{const v=schema.parse(await req.json());const email=v.email.toLowerCase().trim();if(await prisma.user.findUnique({where:{email}}))return NextResponse.json({error:'Email sudah digunakan.'},{status:409});if(await prisma.patientProfile.findUnique({where:{identityNumber:v.identityNumber}}))return NextResponse.json({error:'Nomor identitas sudah terdaftar.'},{status:409});const user=await prisma.user.create({data:{fullName:v.fullName,email,phone:v.phone,passwordHash:await bcrypt.hash(v.password,12),role:'PATIENT',patient:{create:{identityNumber:v.identityNumber,birthDate:new Date(v.birthDate),gender:v.gender,address:v.address.trim()}}},select:{id:true,email:true,role:true}});await createSession(user);return NextResponse.json({ok:true,user},{status:201});}catch(e:any){return NextResponse.json({error:e?.issues?.[0]?.message||'Data registrasi tidak valid.'},{status:400});}}

@@ -1,0 +1,8 @@
+"use client";
+import { useEffect, useState } from "react";
+export default function FacilitiesPage(){
+ const [q,setQ]=useState("");const [type,setType]=useState("");const [items,setItems]=useState<any[]>([]);const [err,setErr]=useState("");
+ async function load(){const p=new URLSearchParams();if(q)p.set("q",q);if(type)p.set("type",type);const r=await fetch("/api/facilities?"+p);const d=await r.json();if(!r.ok){setErr(d.error);return}setItems(d.facilities)}
+ useEffect(()=>{load()},[]);
+ return <main className="dashboard"><a href="/dashboard">← Dashboard</a><h1>Cari fasilitas kesehatan</h1><div className="filter-row"><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Cari nama atau wilayah"/><select value={type} onChange={e=>setType(e.target.value)}><option value="">Semua jenis</option><option value="PUSKESMAS">Puskesmas</option><option value="CLINIC">Klinik</option><option value="HOSPITAL">Rumah sakit</option><option value="LABORATORY">Laboratorium</option></select><button className="btn" onClick={load}>Cari</button></div>{err&&<p className="error">{err}</p>}{items.map(f=><article className="data-card" key={f.id}><h3>{f.name} {f.isDemo&&<span className="demo-tag">DATA DEMO</span>}</h3><p>{f.type} · {f.region}</p><p>{f.address}</p><p>Telepon: {f.phone||"Belum tersedia"} · {f.openingHours||"Jam operasional belum diatur"}</p>{f.latitude&&f.longitude&&<a target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${f.latitude}&mlon=${f.longitude}#map=16/${f.latitude}/${f.longitude}`}>Lihat lokasi peta ↗</a>}<p>Dokter: {f.doctors.map((x:any)=>x.doctor.name).join(", ")||"Belum tersedia"}</p></article>)}</main>
+}

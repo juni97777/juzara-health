@@ -1,0 +1,1 @@
+import './globals.css';export const metadata={title:'JUZARA Health',description:'Layanan kesehatan digital'};export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="id"><body>{children}</body></html>;}
