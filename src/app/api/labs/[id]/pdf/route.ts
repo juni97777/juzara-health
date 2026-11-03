@@ -36,3 +36,4 @@ return new NextResponse(body, {
     "Content-Disposition": "attachment; filename=laboratory-result.pdf",
   },
 });
+}
