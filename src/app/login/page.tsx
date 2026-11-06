@@ -12,26 +12,16 @@ function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const r = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Tidak dapat masuk.");
-      router.replace(search.get("next") || "/dashboard");
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  }
+ function submit(e: React.FormEvent) {
+  e.preventDefault();
+  setBusy(true);
+  setError("");
+
+  sessionStorage.setItem("juzara_demo_mode", "true");
+  sessionStorage.setItem("juzara_demo_email", email);
+
+  router.replace("/dashboard");
+}
 
   return <main className="auth-wrap">
     <form className="auth-card" onSubmit={submit}>
